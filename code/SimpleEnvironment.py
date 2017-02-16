@@ -32,8 +32,8 @@ class SimpleEnvironment(object):
         # TODO: Generate and return a random configuration
         #
         #Peter: just random config in the limitations
-        config[0] = lower_limits + (upper_limits-lower_limits) * numpy.random_sample()
-        config[1] = lower_limits + (upper_limits-lower_limits) * numpy.random_sample()
+        config[0] = lower_limits[0] + (upper_limits[0]-lower_limits[0]) * numpy.random.random_sample()
+        config[1] = lower_limits[1] + (upper_limits[1]-lower_limits[1]) * numpy.random.random_sample()
         
 
         return numpy.array(config)
@@ -45,13 +45,12 @@ class SimpleEnvironment(object):
         # 
         #Peter: calculate the Euclidean distance of the two config
         assert ( len(start_config) == 2 and len(end_config) == 2)
-        distance =((start_config[0] - end_config[0])^2 + (start_config[1] - end_config[1])^2)^0.5
+        distance =pow(  pow(start_config[0] - end_config[0],2) + pow(start_config[1] - end_config[1],2) , 0.5)
 
         return distance
 
     def Extend(self, start_config, end_config):
         
-        #
         # TODO: Implement a function which attempts to extend from 
         #   a start configuration to a goal configuration
         #The function should return
@@ -59,22 +58,39 @@ class SimpleEnvironment(object):
         #this configuration is collision free and remains inside the environment boundaries.
         #self.boundary_limits = [[-5., -5.], [5., 5.]]
         collision = False
-        outside = True
-        interpolate = [ start_config[0] + (end_congig[0]-start_config[0])/2 , start_config[1] + (end_config[1]-start_config[1])/2 ]
-        # check inside the boundary
-        if( self.boundary_limits[0][0] <= interpolate[0] and interpolate[0] <= self.boundary_limits[0][1]
-                and self.boundary_limits[1][0] <= interpolate[1] and interpolate[1] <= self.boundary_limits[1][1]): outside = False
-        new_robot = self.robot;
-        position = new_robot.GetTransform();
-        postion[0][3] = interpolate[0];
-        position[1][3] = interpolate[1];
-        new_robot.SetTransform(position);
-        if(self.CheckCollision(new_robot, self.table)): collision = True
+        outside = False
+        lower_limits, upper_limits = self.boundary_limits
+        resolution = 100;
+        move_dir = [float(end_config[0]-start_config[0])/float(resolution), float(end_config[1]-start_config[1])/float(resolution)];
+        position_unchange = self.robot.GetTransform();
+        for i in range(resolution+1):  
+            #get the robot position
+            position = self.robot.GetTransform()
+            position[0][3] = start_config[0] + i*move_dir[0];
+            position[1][3] = start_config[1] + i*move_dir[1];
+            self.robot.SetTransform(position);
+            if(self.robot.GetEnv().CheckCollision(self.robot)): 
+                collision = True
+                #print position
+                print "Detected collsion!! will return last step"
+                print 
+            if( upper_limits[0] < position[0][3] or position[0][3] < lower_limits[0] or upper_limits[1] < position[1][3] or position[1][3] < lower_limits[1]): 
+                outside = True
+                #print position
+                print "Detected outside of bound!! will return last step"
+            self.robot.SetTransform(position_unchange);
+        #check the collision == not touch the table && inside the boundary
+            if(collision or outside):
+                if(i >=1):
+                    valid_config = [0,0]
+                    valid_config[0] = start_config[0] + (i-1)* move_dir[0]
+                    valid_config[1] = start_config[1] + (i-1)* move_dir[1]
+                    return valid_config
+                else: return None
+        #No interpolate with collision and outside
         
-        #check the collision == not touch the table
-        if(collision or outside): return null
-        else: return interpolate
-        #return NULL
+        return end_config
+                #return NULL
 
     def ShortenPath(self, path, timeout=5.0):
         
