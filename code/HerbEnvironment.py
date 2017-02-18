@@ -35,7 +35,19 @@ class HerbEnvironment(object):
 
         #
         # TODO: Generate and return a random configuration
-        #
+        # Brad
+	lower_limits, upper_limits = self.robot.GetActiveDOFLimits()
+	collisionFlag = True
+	while collisionFlag is True:
+		for dof in range(len(self.robot.GetActiveDOFIndices())):
+			config[dof] = lower_limits[dof] + (upper_limits[dof] - lower_limits[dof]) * numpy.random.random_sample()
+		#Lock environment?
+		self.robot.SetActiveDOFValues(numpy.array(config))
+		if(self.robot.GetEnv().CheckCollision(self.robot)) is False:
+			collisionFlag = False
+		else:
+			print "Collision detected in random configuration"
+	
         return numpy.array(config)
 
 
@@ -45,8 +57,9 @@ class HerbEnvironment(object):
         #
         # TODO: Implement a function which computes the distance between
         # two configurations
-        #
-        pass
+        # Brad
+	distance = numpy.linalg.norm(end_config - start_config)
+        return distance
 
 
     def Extend(self, start_config, end_config):
