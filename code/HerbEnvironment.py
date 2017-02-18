@@ -35,13 +35,14 @@ class HerbEnvironment(object):
 
         #
         # TODO: Generate and return a random configuration
-        # Brad
+        #
+	# Brad: Generate and return a random, collision-free, configuration
 	lower_limits, upper_limits = self.robot.GetActiveDOFLimits()
 	collisionFlag = True
 	while collisionFlag is True:
 		for dof in range(len(self.robot.GetActiveDOFIndices())):
 			config[dof] = lower_limits[dof] + (upper_limits[dof] - lower_limits[dof]) * numpy.random.random_sample()
-		#Lock environment?
+		#CHECK: Lock environment?
 		self.robot.SetActiveDOFValues(numpy.array(config))
 		if(self.robot.GetEnv().CheckCollision(self.robot)) is False:
 			collisionFlag = False
@@ -57,7 +58,8 @@ class HerbEnvironment(object):
         #
         # TODO: Implement a function which computes the distance between
         # two configurations
-        # Brad
+        # 
+	# Brad: Compute the distance between two configurations as the L2 norm
 	distance = numpy.linalg.norm(end_config - start_config)
         return distance
 
@@ -68,7 +70,41 @@ class HerbEnvironment(object):
         # TODO: Implement a function which attempts to extend from 
         #   a start configuration to a goal configuration
         #
-        pass
+	# Brad: Extend from start to end configuration and return sooner if collision or limits exceeded
+	lower_limits, upper_limits = self.robot.GetActiveDOFLimits()
+	resolution = 100
+	
+	#Calculate incremental configuration changes
+	config_inc = [0] * len(self.robot.GetActiveDOFIndices())
+	for dof in range(len(self.robot.GetActiveDOFIndices())):
+		config_inc[dof] = (end_config[dof] - start_config[dof]) / float(resolution)
+
+	#Set initial config state to None to return if start_config violates conditions
+	config = None
+ 
+	#Move from start_config to end_config
+	for step in range(resolution+1):
+		prev_config = config
+		config = [0] * len(self.robot.GetActiveDOFIndices())
+		for dof in range(len(self.robot.GetActiveDOFIndices())):
+			#Calculate new config
+			config[dof] = start_config[dof] + config_inc[dof]*float(step)
+
+			#Check joint limits
+			if config[dof] > upper_limits[dof]:
+				print "Upper joint limit exceeded"
+				return prev_config
+			if config[dof] < lower_limits[dof]:
+				print "Lower joint limit exceeded"
+				return prev_config
+
+		#Set config and check for collision
+		#CHECK: Lock environment?
+		self.robot.SetActiveDOFValues(numpy.array(config))
+		if(self.robot.GetEnv().CheckCollision(self.robot)) is True:
+			print "Collision detected"
+			return prev_config
+        return end_config
         
     def ShortenPath(self, path, timeout=5.0):
         
