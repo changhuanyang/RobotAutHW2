@@ -72,12 +72,12 @@ class SimpleEnvironment(object):
             if(self.robot.GetEnv().CheckCollision(self.robot)): 
                 collision = True
                 #print position
-                print "Detected collsion!! will return last step"
+                print "Detected collsion!! Will return last safe step"
                 print 
             if( upper_limits[0] < position[0][3] or position[0][3] < lower_limits[0] or upper_limits[1] < position[1][3] or position[1][3] < lower_limits[1]): 
                 outside = True
                 #print position
-                print "Detected outside of bound!! will return last step"
+                print "Detected outside of bound!! Will return last safe step"
             self.robot.SetTransform(position_unchange);
         #check the collision == not touch the table && inside the boundary
             if(collision or outside):
@@ -134,4 +134,3 @@ class SimpleEnvironment(object):
                 [sconfig[1], econfig[1]],
                 'k.-', linewidth=2.5)
         pl.draw()
-
