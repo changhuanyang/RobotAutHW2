@@ -49,22 +49,25 @@ class RRTConnectPlanner(object):
             if(dist_f <= epsilon and dist_r <= epsilon): 
                 final_vid_v_drop_r = rtree.AddVertex(v_drop)
                 rtree.AddEdge(i_nearst_r,final_vid_v_drop_r)
-                self.planning_env.PlotEdge(v_nearst_r,v_drop)
+                if(len(v_nearst_r) ==2): #make sure there is 2D config will show the plot
+                    self.planning_env.PlotEdge(v_nearst_r,v_drop)
 
                 final_vid_v_drop_f = ftree.AddVertex(v_drop)
                 ftree.AddEdge(i_nearst_f,final_vid_v_drop_f)
-                self.planning_env.PlotEdge(v_nearst_f,v_drop)
+                #self.planning_env.PlotEdge(v_nearst_f,v_drop)
                 
                 break
             elif(dist_f <= dist_r): # v_drop more close to the ftree
                 vid_v_drop_f = ftree.AddVertex(ext_v_drop_to_f)
                 ftree.AddEdge(i_nearst_f,vid_v_drop_f)
-                self.planning_env.PlotEdge(v_nearst_f,ext_v_drop_to_f)
+                if(len(v_nearst_f) == 2):
+                    self.planning_env.PlotEdge(v_nearst_f,ext_v_drop_to_f)
             
             else: # v_drop more close to the rtree
                 vid_v_drop_r = rtree.AddVertex(ext_v_drop_to_r)
                 rtree.AddEdge(i_nearst_r,vid_v_drop_r)
-                self.planning_env.PlotEdge(v_nearst_r,ext_v_drop_to_r)
+                if(len(v_nearst_r) == 2):
+                    self.planning_env.PlotEdge(v_nearst_r,ext_v_drop_to_r)
         #assert(v_drop != None)
         # Terminate condition : the distance from v_drop to both ftree and rtree is less than epsilon 
 

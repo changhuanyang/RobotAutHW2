@@ -26,6 +26,9 @@ def main(robot, planning_env, planner):
     #traj = robot.ConvertPlanToTrajectory(plan)
     robot.ExecuteTrajectory(traj)
 
+    import IPython
+    IPython.embed()
+
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='script for testing planners')
