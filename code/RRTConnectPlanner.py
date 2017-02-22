@@ -49,12 +49,14 @@ class RRTConnectPlanner(object):
             if(dist_f <= epsilon and dist_r <= epsilon): 
                 final_vid_v_drop_r = rtree.AddVertex(v_drop)
                 rtree.AddEdge(i_nearst_r,final_vid_v_drop_r)
-                if(len(v_nearst_r) ==2): #make sure there is 2D config will show the plot
+                if(len(v_nearst_r) == 2): #make sure there is 2D config will show the plot
                     self.planning_env.PlotEdge(v_nearst_r,v_drop)
 
                 final_vid_v_drop_f = ftree.AddVertex(v_drop)
+                
                 ftree.AddEdge(i_nearst_f,final_vid_v_drop_f)
-                #self.planning_env.PlotEdge(v_nearst_f,v_drop)
+                if(len(v_nearst_f) == 2): #make sure there is 2D config will show the plot
+                    self.planning_env.PlotEdge(v_nearst_f,v_drop)
                 
                 break
             elif(dist_f <= dist_r): # v_drop more close to the ftree
