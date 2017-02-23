@@ -1,5 +1,6 @@
 import numpy 
 import matplotlib.pyplot as pl
+import time
 
 class SimpleEnvironment(object):
     
@@ -99,7 +100,26 @@ class SimpleEnvironment(object):
         #  on the given path.  Terminate the shortening after the 
         #  given timout (in seconds).
         #
-        return path
+        #Brad
+	path_short = list(path)
+	elapsed_time = 0
+	start_time = time.time();
+	while elapsed_time < timeout:
+		end_time = time.time();
+		elapsed_time = end_time - start_time
+		#print path_short
+		if len(path) < 3:
+			return path_short
+		else:
+			init_idx = numpy.random.randint(0,len(path_short)-2)
+			end_idx = numpy.random.randint(init_idx+2,len(path_short))
+			init_ms = path_short[init_idx]
+			end_ms = path_short[end_idx]
+			result_ms = self.Extend(init_ms,end_ms)
+			if numpy.array_equal(end_ms,result_ms):
+				for elem in range(init_idx+1,end_idx):
+					del path_short[elem]
+        return path_short
 
 
     def InitializePlot(self, goal_config):
