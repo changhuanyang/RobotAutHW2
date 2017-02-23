@@ -45,12 +45,13 @@ class HerbEnvironment(object):
 		#CHECK: Lock environment?
 		self.robot.SetActiveDOFValues(numpy.array(config))
 		if(self.robot.GetEnv().CheckCollision(self.robot)) is False:
-			collisionFlag = False
+			if(self.robot.CheckSelfCollision()) is False:
+				collisionFlag = False
+			else:
+				print "Self Collision detected in random configuration"
 		else:
-			print "Collision detected in random configuration"
-	
+			print "Collision Detected in random configuration"	
         return numpy.array(config)
-
 
     
     def ComputeDistance(self, start_config, end_config):
@@ -102,7 +103,10 @@ class HerbEnvironment(object):
 		#CHECK: Lock environment?
 		self.robot.SetActiveDOFValues(numpy.array(config))
 		if(self.robot.GetEnv().CheckCollision(self.robot)) is True:
-			print "Collision detected"
+			print "Collision Detected in extend"
+			return prev_config
+		if(self.robot.CheckSelfCollision()) is True:
+			print "Self Collision Detected in extend"
 			return prev_config
         return end_config
         
