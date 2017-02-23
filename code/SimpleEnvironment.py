@@ -73,12 +73,12 @@ class SimpleEnvironment(object):
             if(self.robot.GetEnv().CheckCollision(self.robot)): 
                 collision = True
                 #print position
-                print "Detected collsion!! Will return last safe step"
-                print 
+                #print "Detected collision!! Will return last safe step"
+                #print 
             if( upper_limits[0] < position[0][3] or position[0][3] < lower_limits[0] or upper_limits[1] < position[1][3] or position[1][3] < lower_limits[1]): 
                 outside = True
                 #print position
-                print "Detected outside of bound!! Will return last safe step"
+                #print "Detected outside of bound!! Will return last safe step"
             self.robot.SetTransform(position_unchange);
         #check the collision == not touch the table && inside the boundary
             if(collision or outside):
@@ -101,25 +101,47 @@ class SimpleEnvironment(object):
         #  given timout (in seconds).
         #
         #Brad
-	path_short = list(path)
+	#print "Start shortening"
+	prev_path = list(path)
+	prev_len = self.ComputePathLength(path)
+	print "Current path length is %f" % prev_len
 	elapsed_time = 0
 	start_time = time.time();
 	while elapsed_time < timeout:
 		end_time = time.time();
 		elapsed_time = end_time - start_time
 		#print path_short
-		if len(path) < 3:
-			return path_short
+		if len(prev_path) < 3:
+			print "Shortened path length is %f" % self.ComputePathLength(prev_path)
+			return prev_path
 		else:
-			init_idx = numpy.random.randint(0,len(path_short)-2)
-			end_idx = numpy.random.randint(init_idx+2,len(path_short))
-			init_ms = path_short[init_idx]
-			end_ms = path_short[end_idx]
-			result_ms = self.Extend(init_ms,end_ms)
-			if numpy.array_equal(end_ms,result_ms):
-				for elem in range(init_idx+1,end_idx):
-					del path_short[elem]
-        return path_short
+			curr_path = list(path)
+			for attempt in range(len(path)*len(path)):
+				#print attempt
+				init_idx = numpy.random.randint(0,len(curr_path)-2)
+				end_idx = numpy.random.randint(init_idx+2,len(curr_path))
+				init_ms = curr_path[init_idx]
+				end_ms = curr_path[end_idx]
+				result_ms = self.Extend(init_ms,end_ms)
+				if numpy.array_equal(end_ms,result_ms):
+					for elem in range(init_idx+1,end_idx):
+						del curr_path[elem]
+			curr_len = self.ComputePathLength(curr_path)
+			if curr_len < prev_len:
+				prev_path = curr_path
+				prev_len = curr_len
+	print "Shortened path length is %f" % self.ComputePathLength(prev_path)
+        return prev_path
+	
+    def ComputePathLength(self, path):
+	#Helper function to compute path length
+	length = 0
+	for milestone in range(1,len(path)):
+		#print path[milestone-1], path[milestone]
+		distance = self.ComputeDistance(numpy.array(path[milestone-1]),numpy.array(path[milestone]))
+		#print distance
+		length += distance
+	return length
 
 
     def InitializePlot(self, goal_config):
