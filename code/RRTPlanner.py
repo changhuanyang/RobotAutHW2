@@ -19,39 +19,63 @@ class RRTPlanner(object):
         #  of dimension k x n where k is the number of waypoints
         #  and n is the dimension of the robots configuration space
         
-        plan.append(start_config)
-        plan.append(goal_config)
-        # Kai's implementation
+        #plan.append(start_config)
+        #plan.append(goal_config)
 
-        #currently the waypoints is unsorted
-        #establish the goal tree
-        tree2 = RRTTree(self.planning_env, goal_config)
-        i=0
+        # Kai's implementation
         while(1):           
             #import IPython
             #IPython.embed()
-            #drop one valid random point that only connect with goal tree
+            #drop one valid random point that only connect with start tree
             point_drop = self.planning_env.GenerateRandomConfiguration()
-            index2, dist2 = tree2.GetNearestVertex(point_drop)
-            point_chosen = self.planning_env.Extend(tree2.vertices[index2], point_drop)
-            vid2 = tree2.AddVertex(point_chosen)
-            tree2.AddEdge(index2, vid2)
-            self.planning_env.PlotEdge(tree2.vertices[index2],point_chosen)
-            plan.insert(len(plan)-1-i,point_chosen)
+            index, near_point = tree.GetNearestVertex(point_drop)
+            point_chosen_from_s = self.planning_env.Extend(tree.vertices[index],point_drop)
+            point_chosen_from_g = self.planning_env.Extend(goal_config,point_drop)
 
-            #Use the point_chosen as target, try to connect start tree with the target
-            index, dist = tree.GetNearestVertex(point_chosen)
-            point_reach = self.planning_env.Extend(tree.vertices[index], point_chosen)
-           
-            vid = tree.AddVertex(point_reach)
-            tree.AddEdge(index, vid)
-            self.planning_env.PlotEdge(tree.vertices[index],point_reach)
-            i+=1
-            plan.insert(i,point_reach)
-            
-            if (abs(point_reach[0]-point_chosen[0])<100*epsilon and abs(point_reach[1]-point_chosen[1])<100*epsilon):
+            #Check whether the point_drop can be directly used for connecting both
+
+            if(point_chosen_from_s == None or point_chosen_from_g == None): continue
+
+            dist_s = self.planning_env.ComputeDistance(point_chosen_from_s, point_drop)
+            dist_g = self.planning_env.ComputeDistance(point_chosen_from_g,point_drop)
+
+            if (dist_s <= epsilon and dist_g <= epsilon):
+                point_addon_s_final = tree.AddVertex(point_chosen_from_s)
+                tree.AddEdge(index,point_addon_s_final)
+                point_addon_g_final = tree.AddVertex(point_chosen_from_g)
+                tree.AddEdge(point_addon_s_final,point_addon_g_final)
+                #self.planning_env.PlotEdge(near_point,point_chosen_from_s)
+                #self.planning_env.PlotEdge(point_chosen_from_g,goal_config)
                 break
 
+            #If point_drop can only connect to start tree but not connect to goal point
+            elif (dist_s <= epsilon and dist_g > epsilon):
+                point_addon_s = tree.AddVertex(point_chosen_from_s)
+                tree.AddEdge(index,point_addon_s)
+                #self.planning_env.PlotEdge(near_point,point_chosen_from_s)
 
+            #If point_drop can connect either the start tree or the goal point
+            elif (dist_s > epsilon and dist_g > epsilon):
+                point_addon_s = tree.AddVertex(point_chosen_from_s)
+                tree.AddEdge(index,point_addon_s)
+                #self.planning_env.PlotEdge(near_point,point_chosen_from_s)
+        # Find the path        
+        path_start_tree = self.find_path(tree, 0, point_addon_g_final)
+        path_start_tree.reverse()
+        for i in path_start_tree:
+            plan.append(i)
+        plan.append(goal_config)
+        print "total plan"
+        print plan
         return plan
+
+
+    def find_path(self, tree, start_id, end_id): #[start_id, end_id)
+        id_next_v = end_id
+        path = []
+        while(id_next_v != start_id):
+            id_next_v = tree.edges[id_next_v]
+            path.append(tree.vertices[id_next_v])
+        return path
+
         
