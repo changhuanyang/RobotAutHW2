@@ -1,6 +1,6 @@
 import numpy, operator
 from RRTPlanner import RRTTree
-
+import time
 class RRTConnectPlanner(object):
 
     def __init__(self, planning_env, visualize):
@@ -9,7 +9,7 @@ class RRTConnectPlanner(object):
         
 
     def Plan(self, start_config, goal_config, epsilon = 0.001):
-        
+        start_time = time.time();
         ftree = RRTTree(self.planning_env, start_config)
         rtree = RRTTree(self.planning_env, goal_config)
         plan = []
@@ -76,16 +76,19 @@ class RRTConnectPlanner(object):
         # use tree.edge one both tree to find the valid path
             
         # for ftree's path : [start_config -> v_drop) 
+        total_time = time.time() - start_time;
+
+
         plan_ftree = self.find_path(ftree, 0, final_vid_v_drop_f)
         plan_ftree.reverse()
-        print "plan ftree"
-        print plan_ftree            
+        #print "plan ftree"
+        #print plan_ftree            
         #assert ( len(plan_ftree) != 0 )
 
         # for rtree's path: [Goal_config -> v_drop) then reverse
         plan_rtree = self.find_path(rtree, 0, final_vid_v_drop_r)
-        print "plan rtree"
-        print plan_rtree
+        #print "plan rtree"
+        #print plan_rtree
         #assert ( len(plan_rtree) != 0 )
 
         # combine ftree's path + v_drop + rtree's path
@@ -93,14 +96,24 @@ class RRTConnectPlanner(object):
             plan.append(i)
 
         plan.append(v_drop)
-        print "final v_drop"
-        print v_drop
+        #print "final v_drop"
+        #print v_drop
 
         for i in plan_rtree:
             plan.append(i)
-        print "total plan"
-        print plan
+        #print "total plan"
+        #print plan
+        
+        dist_plan = self.planning_env.ComputePathLength(plan)
+        print "total plan distance"
+        print dist_plan
+        
+        print "total vertice in tree "
+        print len(ftree.vertices) + len(rtree.vertices) -1
         # end of implement
+        print "total plan time = "
+        print total_time
+        print " "
         return plan
     # help function to find the route
     def find_path(self, tree, start_id, end_id): #[start_id, end_id)
