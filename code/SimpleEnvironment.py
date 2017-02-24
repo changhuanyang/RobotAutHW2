@@ -61,7 +61,7 @@ class SimpleEnvironment(object):
         collision = False
         outside = False
         lower_limits, upper_limits = self.boundary_limits
-        resolution = 100;
+        resolution = 1000;
         move_dir = [float(end_config[0]-start_config[0])/float(resolution), float(end_config[1]-start_config[1])/float(resolution)];
         position_unchange = self.robot.GetTransform();
         for i in range(resolution+1):  
@@ -125,7 +125,7 @@ class SimpleEnvironment(object):
 				result_ms = self.Extend(init_ms,end_ms)
 				if numpy.array_equal(end_ms,result_ms):
 					for elem in range(init_idx+1,end_idx):
-						del curr_path[elem]
+						del curr_path[init_idx+1]
 			curr_len = self.ComputePathLength(curr_path)
 			if curr_len < prev_len:
 				prev_path = curr_path
