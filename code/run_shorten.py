@@ -19,16 +19,19 @@ def main(robot, planning_env, planner):
         goal_config = numpy.array([2.0, -0.8])
 
     while(True):
-	#raw_input('Press any key to begin planning')
+	raw_input('Press any key to begin planning')
 	plan = planner.Plan(start_config, goal_config)
 	plan_short = planning_env.ShortenPath(plan,1.0)
+
+	raw_input('Press any key to begin playback')
+	traj = robot.ConvertPlanToTrajectory(plan)
+	robot.ExecuteTrajectory(traj)
 	print 'Shortened Plan'
 	print plan_short
 	print "Original plan was %u milestones long" % len(plan)
 	print "Shortened plan is %u milestones long" % len(plan_short)
-	#traj = robot.ConvertPlanToTrajectory(plan_short)
-	#traj = robot.ConvertPlanToTrajectory(plan)
-	#robot.ExecuteTrajectory(traj)
+	traj = robot.ConvertPlanToTrajectory(plan_short)
+	robot.ExecuteTrajectory(traj)
 
     import IPython
     IPython.embed()
