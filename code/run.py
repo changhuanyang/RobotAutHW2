@@ -21,9 +21,9 @@ def main(robot, planning_env, planner):
         goal_config = numpy.array([2.0, -0.8])
 
     plan = planner.Plan(start_config, goal_config)
-    plan_short = planning_env.ShortenPath(plan)
-    traj = robot.ConvertPlanToTrajectory(plan_short)
-    #traj = robot.ConvertPlanToTrajectory(plan)
+    #plan_short = planning_env.ShortenPath(plan)
+    #traj = robot.ConvertPlanToTrajectory(plan_short)
+    traj = robot.ConvertPlanToTrajectory(plan)
     robot.ExecuteTrajectory(traj)
 
     import IPython

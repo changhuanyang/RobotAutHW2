@@ -1,6 +1,6 @@
 import numpy
 from RRTTree import RRTTree
-
+import time
 class RRTPlanner(object):
 
     def __init__(self, planning_env, visualize):
@@ -9,6 +9,8 @@ class RRTPlanner(object):
         
 
     def Plan(self, start_config, goal_config, epsilon = 0.001):
+
+        start_time = time.time()
         #establish the start tree
         tree = RRTTree(self.planning_env, start_config)
         plan = []
@@ -59,14 +61,25 @@ class RRTPlanner(object):
                 point_addon_s = tree.AddVertex(point_chosen_from_s)
                 tree.AddEdge(index,point_addon_s)
                 #self.planning_env.PlotEdge(near_point,point_chosen_from_s)
+
+        total_time = time.time() - start_time;
         # Find the path        
         path_start_tree = self.find_path(tree, 0, point_addon_g_final)
         path_start_tree.reverse()
         for i in path_start_tree:
             plan.append(i)
         plan.append(goal_config)
-        print "total plan"
-        print plan
+
+        dist_plan = self.planning_env.ComputePathLength(plan)
+        print "total plan distance"
+        print dist_plan
+        
+        print "total vertice in tree "
+        print len(tree.vertices)
+        # end of implement
+        print "total plan time = "
+        print total_time
+        print " "
         return plan
 
 
